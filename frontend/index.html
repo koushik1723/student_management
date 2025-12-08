@@ -61,6 +61,11 @@
 
 
 <script>
+// ================== CONFIG ===================
+const API_URL = "https://studentmanagement-azcyf5ahfqcxbuas.westeurope-01.azurewebsites.net";
+
+
+// ================== MARK ADD ===================
 function addMark() {
     let html =
         `<br>
@@ -69,6 +74,8 @@ function addMark() {
     document.getElementById("marksDiv").insertAdjacentHTML("beforeend", html);
 }
 
+
+// ================== SUBMIT STUDENT ===================
 async function submitStudent() {
     let name = document.getElementById("name").value;
     let age = Number(document.getElementById("age").value);
@@ -85,7 +92,7 @@ async function submitStudent() {
 
     let body = { name, age, email, marks };
 
-    let res = await fetch("http://127.0.0.1:8000/students/", {
+    let res = await fetch(`${API_URL}/students/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -99,8 +106,10 @@ async function submitStudent() {
     }
 }
 
+
+// ================== LOAD STUDENTS ===================
 async function loadStudents() {
-    let response = await fetch("http://127.0.0.1:8000/students/");
+    let response = await fetch(`${API_URL}/students/`);
     let data = await response.json();
 
     const tableBody = document.querySelector("#studentsTable tbody");

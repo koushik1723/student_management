@@ -1,5 +1,8 @@
-const API_URL = "http://127.0.0.1:8000";
+// ===== Replace Local with Azure API =====
+const API_URL = "https://studentmanagement-azcyf5ahfqcxbuas.westeurope-01.azurewebsites.net";
 
+
+// Dynamically add more marks input fields
 function addMore() {
     let div = document.createElement("div");
     div.className = "marks";
@@ -11,6 +14,7 @@ function addMore() {
 }
 
 
+// =========== SUBMIT STUDENT TO API ===========
 async function submitStudent() {
     let name = document.getElementById("name").value;
     let age = Number(document.getElementById("age").value);
@@ -35,22 +39,40 @@ async function submitStudent() {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(body)
-    })
+    });
 
-    alert(res.status === 200 ? "Student Added!" : "Error adding student")
+    if (res.ok) {
+        alert("🎉 Student Added Successfully!");
+        getStudents();
+    } else {
+        alert("❌ Error Adding Student");
+    }
 }
 
 
+
+// =========== GET & DISPLAY STUDENTS ===========
 async function getStudents() {
     let res = await fetch(`${API_URL}/students/`);
-    let data = await res.json();
+    if (!res.ok) {
+        alert("Error fetching students!");
+        return;
+    }
 
+    let data = await res.json();
     let ul = document.getElementById("student-list");
     ul.innerHTML = "";
-    
+
     data.forEach(s => {
         let li = document.createElement("li");
-        li.innerHTML = `${s.name} (${s.email}) - Marks: ${s.marks.map(m => m.subject + ":" + m.marks).join(", ")}`;
+        li.innerHTML = `
+            <b>${s.name}</b> (${s.email}) - 
+            Marks: ${s.marks.map(m => m.subject + ":" + m.marks).join(", ")}
+        `;
         ul.appendChild(li);
     });
 }
+
+
+// Auto load students when the page opens
+window.onload = getStudents;
