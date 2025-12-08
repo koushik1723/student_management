@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Management System</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+
+        input { padding: 8px; margin: 5px; width: 250px; }
+        button { padding: 8px 15px; background: royalblue; color: white; border: none; cursor: pointer; }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid gray;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #ececec;
+        }
+    </style>
+</head>
+<body>
+
+<h2>➕ Add Student</h2>
+
+<input id="name" placeholder="Enter Name" required>
+<input id="age" placeholder="Enter Age" required>
+<input id="email" placeholder="Enter Email" required>
+
+<h3>Marks (Subject - Marks)</h3>
+<div id="marksDiv">
+    <input class="subject" placeholder="Subject">
+    <input class="mark" placeholder="Mark">
+</div>
+
+<br>
+<button onclick="addMark()">+ Add another subject</button>
+<br><br>
+<button onclick="submitStudent()">Submit Student</button>
+
+<hr>
+
+<h2>📋 Students Records</h2>
+<button onclick="loadStudents()">Load Students</button>
+
+<table id="studentsTable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Email</th>
+            <th>Subjects & Marks</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+
+<script>
+function addMark() {
+    let html =
+        `<br>
+        <input class="subject" placeholder="Subject">
+        <input class="mark" placeholder="Mark">`
+    document.getElementById("marksDiv").insertAdjacentHTML("beforeend", html);
+}
+
+async function submitStudent() {
+    let name = document.getElementById("name").value;
+    let age = Number(document.getElementById("age").value);
+    let email = document.getElementById("email").value;
+
+    let marks = [];
+    document.querySelectorAll(".subject").forEach((sub, i) => {
+        let subject = sub.value;
+        let markVal = Number(document.querySelectorAll(".mark")[i].value);
+        if (subject && markVal) {
+            marks.push({ subject: subject, marks: markVal });
+        }
+    });
+
+    let body = { name, age, email, marks };
+
+    let res = await fetch("http://127.0.0.1:8000/students/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+    });
+
+    if (res.ok) {
+        alert("Student added successfully!");
+        loadStudents(); // Refresh table automatically
+    } else {
+        alert("Error adding student!");
+    }
+}
+
+async function loadStudents() {
+    let response = await fetch("http://127.0.0.1:8000/students/");
+    let data = await response.json();
+
+    const tableBody = document.querySelector("#studentsTable tbody");
+    tableBody.innerHTML = "";
+
+    data.forEach(student => {
+        let marksText = student.marks.map(m => `${m.subject}: ${m.marks}`).join(", ");
+
+        let row =
+            `<tr>
+                <td>${student.name}</td>
+                <td>${student.age}</td>
+                <td>${student.email}</td>
+                <td>${marksText}</td>
+            </tr>`;
+        tableBody.innerHTML += row;
+    });
+}
+</script>
+
+</body>
+</html>
